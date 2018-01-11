@@ -5,72 +5,87 @@ import (
 	"github.com/ivanthescientist/projecteuler/primes"
 )
 
+var primeList = primes.GenerateEratosthenes(1000000)
+
 func main() {
-	//current := 0
-	//maxDivisors := 0
-	//maxDivisorsNumber := 0
-	//for i := 1; i < 100000; i++ {
-	//	current += 1
-	//	divisors := getDivisorsNumber(current)
-	//	if divisors > maxDivisors {
-	//		maxDivisors = divisors
-	//		maxDivisorsNumber = i
-	//	}
-	//}
-	//
-	//println(maxDivisors)
-	//println(maxDivisorsNumber)
+	fmt.Println("Project Euler #12: Highly divisable triangular number")
+	maxFactors := 0
+	maxFactorsNumber := 0
 
-	//fmt.Println(generatePrimes(1000))
+	for i := 1; maxFactors < 500; i++ {
+		current := getTriangularNumber(i)
+		currentFactors := getTriangularNumberFactors(i)
 
-	current := 0
-	primeList := primes.GenerateEratosthenes(10000000000)
-	maxDivisors := 0
-	maxDivisorsNumber := 0
-
-	startSearch := 700000
-
-	for i := 1; i < 1000000; i++ {
-		current += i
-		if i > startSearch {
-			divisors := getDivisorsNumber(i, primeList)
-			if divisors > maxDivisors {
-				maxDivisors = divisors
-				maxDivisorsNumber = current
-				fmt.Printf("New Max Divisors #%d for %dth Number: %d\n", maxDivisors, i, maxDivisorsNumber)
-			}
+		if currentFactors > maxFactors {
+			maxFactors = currentFactors
+			maxFactorsNumber = current
+			fmt.Printf("New Max Divisors #%d for %dth Number: %d\n", maxFactors, i, maxFactorsNumber)
 		}
 	}
 
-	fmt.Println(maxDivisors)
-	fmt.Println(maxDivisorsNumber)
+	fmt.Println(maxFactors)
+	fmt.Println(maxFactorsNumber)
 }
 
-func getDivisorsNumber(num int, primes []int) int {
-	if num <= 1 {
+func getTriangularNumber(order int) int {
+	return order * (order + 1) / 2
+}
+
+func getTriangularNumberFactors(n int) int {
+	a := n
+	b := n + 1
+	aFactors := getPrimeFactorsList(a)
+	bFactors := getPrimeFactorsList(b)
+
+	if len(aFactors) == 0 || len(bFactors) == 0 {
 		return 1
 	}
-	divisors := 1
 
-	for _, prime := range primes {
-		if prime > num {
+	if a % 2 == 0{
+		aFactors[0].Coefficient--
+	}
+
+	if b % 2 == 0 {
+		bFactors[0].Coefficient--
+	}
+
+	return numberOfFactors(aFactors) * numberOfFactors(bFactors)
+}
+
+func numberOfFactors(array []PrimeFactor) int {
+	product := 1
+
+	for _, number := range array {
+		product *= number.Coefficient
+	}
+
+	return product
+}
+
+type PrimeFactor struct {
+	Prime int
+	Coefficient int
+}
+
+func getPrimeFactorsList(number int) []PrimeFactor {
+	factors := make([]PrimeFactor, 0)
+	for _, prime := range primeList {
+		if number < prime {
 			break
 		}
-		if num%prime == 0 {
-			divisions := 0
-			result := num
-			for {
-				if result%prime != 0 {
-					break
-				}
-
-				result = result / prime
-				divisions++
+		if number % prime == 0 {
+			current := number
+			factor := PrimeFactor{
+				Prime: prime,
+				Coefficient: 1,
 			}
 
-			divisors *= divisions + 1
+			for ; current % prime == 0; current /= prime {
+				factor.Coefficient++
+			}
+			factors = append(factors, factor)
 		}
 	}
 
-	return divisors
+	return factors
 }
