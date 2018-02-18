@@ -38,3 +38,27 @@ func GetMaxLength(numberA []int, numberB []int) int {
 		return lenA
 	}
 }
+
+func ToNumber(digits []int) int {
+	reversedDigits := Reverse(digits)
+	result := 0
+
+	for i, power := 0, 1; i < len(reversedDigits); i, power = i + 1, power * 10 {
+		result += reversedDigits[i] * power
+	}
+
+	return result
+}
+
+func ToBigNumber(value int) []int {
+	current := value
+	digits := make([]int, 0)
+
+	for ;current > 0; {
+		digit := current % 10
+		digits = append(digits, digit)
+		current /= 10
+	}
+
+	return Reverse(digits)
+}
